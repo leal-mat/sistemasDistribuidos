@@ -1,0 +1,17 @@
+server {
+
+	connected: True / False,
+	user: "SERVER"
+	msg: Texto
+
+}
+
+
+client {
+
+	connected: True / False,
+	user: "Daniel 123"
+	msg: Texto
+}
+
+/ENTRAR localhost:6789 paula
