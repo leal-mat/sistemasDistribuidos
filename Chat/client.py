@@ -12,6 +12,14 @@ s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
 connected = False
 user = ""
+print("----------------------------")
+print("""
+      COMANDOS
+      /ENTRAR ip:porta nickname\n
+      /USUARIOS, para listar usuários \n
+      /SAIR, para sair do chat\n
+      """)
+print("----------------------------")
 while not connected:
 
     msg = input()

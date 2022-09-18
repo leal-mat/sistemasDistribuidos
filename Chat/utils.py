@@ -21,7 +21,6 @@ def build_msg(connected, user, msg):
 
 def build_user_list(user, clients):
     connected_users = "CONNECTED USERS:\n\n"
-    print(clients)
     for client in clients:
         # print(clients[client]["user"])
         connected_users += clients[client]["user"] + "\n"
@@ -72,27 +71,27 @@ def new_connection(lock, conn, addrs, clients, all_messages):
                     print(data)
 
 
-def listing_users(lock, conn, addrs, clients):
-    connected = True
-    #msg = {"connected": connected, "user": user, "msg": msg}
+# def listing_users(lock, conn, addrs, clients):
+#     connected = True
+#     #msg = {"connected": connected, "user": user, "msg": msg}
 
-    while connected:
+#     while connected:
 
-        data_b = conn.recv(1024)
-        data = decode_msg(data_b)
+#         data_b = conn.recv(1024)
+#         data = decode_msg(data_b)
 
-        if not data:
-            connected = False
-            conn.close()
+#         if not data:
+#             connected = False
+#             conn.close()
 
-        with lock:
-            all_messages.append(data_b)
+#         with lock:
+#             all_messages.append(data_b)
 
-            if addr_key != client:
-                clients[client]["conn"].sendall(data_b)
-                print(data)
+#             if addr_key != client:
+#                 clients[client]["conn"].sendall(data_b)
+#                 print(data)
 
-    return bytes(json.dumps(msg), "utf-8")
+#     return bytes(json.dumps(msg), "utf-8")
 
 
 # def reading_old_messages(conn, reading):
@@ -110,5 +109,4 @@ def waiting_messages(conn, connected):
         # print("msg: ", msg)
         msg_decoded = decode_msg(msg)
         # print("msg: ", msg_decoded)
-        print(msg_decoded)
         print_msg(msg_decoded)
