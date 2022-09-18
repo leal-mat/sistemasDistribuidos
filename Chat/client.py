@@ -17,10 +17,10 @@ while not connected:
     msg = input()
     args_list = re.split("[ +]", msg, 2)
 
-    adrs = args_list[1].split(":")
+    addrs = args_list[1].split(":")
     user = args_list[2]
     if args_list[0] == "/ENTRAR":
-        s.connect((adrs[0], int(adrs[1])))
+        s.connect((addrs[0], int(addrs[1])))
         s.sendall(build_msg(True, user, ""))
         ack = s.recv(1024)
         ack_decoded = decode_msg(ack)
@@ -29,6 +29,7 @@ while not connected:
             connected = ack[connected]
             lobby = Thread(target=waiting_messages, args=(s, connected))
             lobby.start()
+
 
 print("mande msg: \n")
 while connected:
