@@ -29,4 +29,3 @@ while True:
     Thread(
         target=new_connection, args=(lock, conn, addr, clients, all_messages)
     ).start()
-    # conn.sendall(data.upper())

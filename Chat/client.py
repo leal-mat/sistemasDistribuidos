@@ -32,18 +32,19 @@ while not connected:
         s.sendall(build_msg(True, user, ""))
         ack = s.recv(1024)
         ack_decoded = decode_msg(ack)
-
         if ack_decoded != None:
-            connected = ack[connected]
+            connected = True if ack_decoded["connected"] == '1' else False
             lobby = Thread(target=waiting_messages, args=(s, connected))
             lobby.start()
-
 
 print("mande msg: \n")
 while connected:
     msg = input()
     print("\033[1A" + "\033[K", end="")
     print(f"Você >>>> {msg}")
-    s.sendall(build_msg(connected, user, msg))
 
-s.close()
+    try:
+        s.sendall(build_msg(connected, user, msg))
+    except:
+        s.close()
+        break
