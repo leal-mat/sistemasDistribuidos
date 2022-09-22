@@ -2,14 +2,12 @@ import socket
 import json
 from expression import Expression
 
-i = 0
+
 HOST = ""
 PORT = 6789
 sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 sock.bind((HOST, PORT))
 while True:
-    i += 1
-
     print("Waiting...")
     request, address = sock.recvfrom(1024)
     print("Starting to calculate...")
