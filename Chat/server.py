@@ -4,7 +4,7 @@ from utils import build_msg, new_connection, decode_msg
 from threading import Lock
 
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-s.bind(("34.196.43.24", 6789))
+s.bind(("localhost", 6789))
 s.listen(1)
 
 clients = dict()

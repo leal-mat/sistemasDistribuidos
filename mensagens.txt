@@ -1,0 +1,33 @@
+CLI conecta no Gateway
+
+Gateway -> servidor TCP
+
+Request -> {
+	"comando": (listar objetos), (comando especifico)
+	"id_objeto": (tipo + ip + port)
+	"args": (lista de argumentos)	 						
+}
+
+Response1 -> {
+	"lista_obj": (lista obj) 
+}
+
+Ambiente Inteligente (GymRoom) {
+
+	lampada: {
+		- Podemos ligar desligar
+		- Controlar a cor
+	}
+	esteira: {
+		-Fica  toda hora mandando a distancia percorrida
+		- Controlar a velocidade
+		- Ligar/Desligar
+	}
+	ar: {
+		-Ligar/Desligar
+		-Controlar temperatura
+	}
+}
+
+
+GateWay deve poder descobrir equipamentos inteligentes (comunicação em grupo)
