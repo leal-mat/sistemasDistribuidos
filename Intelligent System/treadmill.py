@@ -1,4 +1,11 @@
 import request_pb2
+import socket
+from threading import Thread
+from threading import Lock
+
+
+MCAST_GRP = 'localhost'
+MCAST_PORT = 6789
 
 
 class Treadmill:
@@ -7,6 +14,10 @@ class Treadmill:
         self.treadmill.type = "Treadmill"
         self.treadmill.dist = 0.0
         self.treadmill.vel = 0.0
+        self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        self.sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        self.sock.bind((MCAST_GRP, MCAST_PORT))
+        Thread(target=self.wait_for_call, args=()).start()
 
     def turn_on(self):
         self.treadmill.status = True
@@ -31,7 +42,12 @@ class Treadmill:
         print(self.treadmill.dist)
         print(self.treadmill.vel)
 
+    def notify_presence(self):
+        msg = "Sou uma esteira inteligente"
+        self.sock.sendto(bytes(msg, 'utf-8'), (MCAST_GRP, MCAST_PORT))
 
-tr = Treadmill()
-
-tr.to_str()
+    def wait_for_call(self):
+        while True:
+            cmd = self.sock.recv(1024).decode('utf-8')
+            if (cmd == "Identifique-se"):
+                print("ok")
