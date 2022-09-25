@@ -1,0 +1,41 @@
+syntax = "proto3";
+package intelligent;
+
+message Lamp {
+    string id = 1;
+    bool status = 2;
+    string type = 3;
+    string color = 4;
+    repeated string cmds = 5;
+}
+
+message Treadmill {
+    string id = 1;
+    bool status = 2;
+    string type = 3;
+    double dist = 4;
+    float vel = 5;
+    repeated string cmds = 6;
+}
+
+message AC {
+    string id = 1;
+    bool status = 2;
+    string type = 3;
+    int32 temp = 4;
+    repeated string cmds = 5;
+}
+
+message Response {
+    repeated Lamp lamps = 1;
+    repeated Treadmill treadmills = 2;
+    repeated AC acs = 3;
+}
+
+message Request {
+
+    string cmd = 1;
+    string id_obj = 2;
+    repeated string args = 3; 
+
+}
