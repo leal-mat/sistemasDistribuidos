@@ -15,6 +15,7 @@ class AC:
         self.ac.type = "AC"
         self.ac.temp = -1
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        self.sock_tcp = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         self.sock.bind((MCAST_GRP, MCAST_PORT))
         Thread(target=self.wait_for_call, args=()).start()
@@ -36,19 +37,17 @@ class AC:
         print(self.ac.type)
         print(self.ac.temp)
 
-    def notify_presence(self):
+    def notify_presence(self, ip, port):
         print("entrou no notify presence")
         id = {"type": "AC", "ip": MCAST_GRP, "port": MCAST_PORT}
-        # self.sock.sendto(bytes(json.dumps(id), "utf-8"),
-        #                  (MCAST_GRP, MCAST_PORT))
 
-        self.sock.sendto(bytes("testando", "utf-8"), (MCAST_GRP, MCAST_PORT))
+        self.sock_tcp.connect((ip, port))
+        self.sock_tcp.sendall(bytes(json.dumps(id), "utf-8"))
+        #self.sock.sendto(bytes("testando", "utf-8"), (MCAST_GRP, MCAST_PORT))
 
         #self.sock.sendto(id.SerializeToString(), (MCAST_GRP, MCAST_PORT))
 
     def wait_for_call(self):
         while True:
-            #cmd = self.sock.recv(1024).decode('utf-8')
-            if (True):
-                print("Ele se identificou")
-                self.notify_presence()
+            cmd = json.loads(self.sock.recv(1024).decode('utf-8'))
+            self.notify_presence(cmd["ip"], cmd["port"])
