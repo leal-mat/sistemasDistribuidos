@@ -1,12 +1,22 @@
 import request_pb2
+import socket
+import json
+from threading import Thread
+from threading import Lock
+from intelligent_obj import IntelligentObj
+
+MCAST_GRP = TCP_IP = 'localhost'
+MCAST_PORT = 6789
 
 
-class Treadmill:
+class Treadmill(IntelligentObj):
     def __init__(self):
         self.treadmill = request_pb2.Treadmill()
         self.treadmill.type = "Treadmill"
         self.treadmill.dist = 0.0
         self.treadmill.vel = 0.0
+        super().__init__()
+        self.type = "Treadmill"
 
     def turn_on(self):
         self.treadmill.status = True
@@ -30,8 +40,3 @@ class Treadmill:
         print(self.treadmill.type)
         print(self.treadmill.dist)
         print(self.treadmill.vel)
-
-
-tr = Treadmill()
-
-tr.to_str()

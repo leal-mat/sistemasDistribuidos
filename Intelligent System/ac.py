@@ -1,11 +1,23 @@
 import request_pb2
+import socket
+from threading import Thread
+from utils import Port
+from threading import Lock
+import json
+from intelligent_obj import IntelligentObj
+
+MCAST_GRP = TCP_IP = 'localhost'
+MCAST_PORT = 6789
 
 
-class AC:
+class AC(IntelligentObj):
+
     def __init__(self):
         self.ac = request_pb2.AC()
         self.ac.type = "AC"
         self.ac.temp = -1
+        super().__init__()
+        self.type = "AC"
 
     def turn_on(self):
         self.ac.status = True
@@ -23,9 +35,3 @@ class AC:
         print(self.ac.status)
         print(self.ac.type)
         print(self.ac.temp)
-
-
-ac = AC()
-
-ac.turn_on()
-ac.to_str()
