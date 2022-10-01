@@ -1,10 +1,9 @@
-import request_pb2
 import socket
 from threading import Thread
-from utils import Port
-from threading import Lock
 import struct
 import json
+import time
+from threading import Lock
 
 MCAST_ADDR = ('225.0.0.250', 5007)
 TCP_IP = '127.0.0.1'
@@ -15,24 +14,36 @@ MCAST_PORT = 6789
 
 
 class IntelligentObj:
-    def __init__(self):
-        self.type = ""
+
+    id_increment = 0
+
+
+    def __init__(self, type, obj):
+        self.type = type
         self.mcast_sock = socket.socket(
             socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
-        self.sock_tcp = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.sock_tcp.bind((TCP_IP, 0))
+        self.tcp_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.tcp_sock.bind((TCP_IP, 0))
         self.connected = False
-        Thread(target=self.wait_for_call, args=()).start()
+        self.lock = Lock()
+        self.obj = obj
+        self.obj.id = self.get_id()
+        self.tr = Thread(target=self.wait_for_call, args=())
+        self.tr.start()
 
     def notify_presence(self, ip, port):
         print("entrou no notify presence - ", self.type)
-        TCP_PORT = self.sock_tcp.getsockname()[1]
+        TCP_PORT = self.tcp_sock.getsockname()[1]
         id = {"type": self.type, "ip": TCP_IP, "port": TCP_PORT}
 
         if not self.connected:
-            self.sock_tcp.connect((ip, port))
-            self.sock_tcp.sendall(bytes(json.dumps(id), "utf-8"))
+            self.tcp_sock.connect((ip, port))
+            self.tcp_sock.sendall(bytes(json.dumps(id), "utf-8"))
             self.connected = True
+
+        time.sleep(0.5)
+        self.send_status()
+        
 
     def wait_for_call(self):
 
@@ -46,11 +57,21 @@ class IntelligentObj:
         self.mcast_sock.setsockopt(
             socket.IPPROTO_IP, socket.IP_ADD_MEMBERSHIP, mreq)
 
-        while True:
-            print("Waiting: ", self.type)
-            data = self.mcast_sock.recv(10240)
-            cmd = json.loads(data.decode('utf-8'))
-            print(cmd)
-            self.notify_presence(cmd["ip"], cmd["port"])
-            # cmd = json.loads(self.sock.recv(1024).decode('utf-8'))
-            # self.notify_presence(cmd["ip"], cmd["port"])
+        
+        print("Waiting: ", self.type)
+        data = self.mcast_sock.recv(10240)
+        cmd = json.loads(data.decode('utf-8'))
+        print(cmd)
+        self.notify_presence(cmd["ip"], cmd["port"])
+        #time.sleep(0.5)
+        #self.send_status()
+        
+    def get_id(self):
+        IntelligentObj.id_increment += 1
+        return str(IntelligentObj.id_increment)
+    def send_status(self):
+        #self.tr.join()
+        if self.connected:
+            print("sending status ", self.type)
+            self.tcp_sock.sendall(self.obj.SerializeToString())
+            print("Enviado ", self.type)

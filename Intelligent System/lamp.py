@@ -1,10 +1,6 @@
 import request_pb2
-import socket
-import json
-from threading import Thread
-from threading import Lock
 from intelligent_obj import IntelligentObj
-
+import time
 
 MCAST_GRP = TCP_IP = 'localhost'
 MCAST_PORT = 6789
@@ -12,25 +8,29 @@ MCAST_PORT = 6789
 
 class Lamp(IntelligentObj):
     def __init__(self, color):
-        self.lamp = request_pb2.Lamp()
-        self.lamp.type = "Lamp"
-        self.lamp.color = color
-        super().__init__()
-        self.type = "Lamp"
+        lamp = request_pb2.Lamp()
+        lamp.type = "Lamp"
+        lamp.color = color
+        super().__init__("lamp", lamp)
 
     def turn_on(self):
-        self.lamp.status = True
+        self.obj.status = True
+        self.send_status()
 
     def turn_off(self):
-        self.lamp.status = False
+        self.obj.status = False
+        self.send_status()
 
     def change_color(self, color):
-        self.lamp.color = color
-
-    def get(self):
-        return self.lamp
+        self.obj.color = color
+        self.send_status()
 
     def to_str(self):
-        print(self.lamp.status)
-        print(self.lamp.type)
-        print(self.lamp.color)
+        print(self.obj.status)
+        print(self.obj.type)
+        print(self.obj.color)
+
+    # def notify_presence(self, ip, port):
+    #     super().notify_presence(ip, port)
+    #     time.sleep(0.5)
+    #     self.send_status()

@@ -2,11 +2,24 @@ import json
 import socket
 from threading import Timer
 from threading import Thread
-
 from utils import Port
+import request_pb2
+from threading import Lock
 
-import struct
-import sys
+lock = Lock()
+
+
+objects_lookup = {
+    "ac": request_pb2.AC,
+    "treadmill": request_pb2.Treadmill,
+    "lamp": request_pb2.Lamp,
+}
+
+intelligent_objects = {
+    "lamp": [], 
+    "treadmill": [], 
+    "ac":[]
+}
 
 multicast_group = ('225.0.0.250', 5007)
 MULTICAST_TTL = 2
@@ -16,56 +29,124 @@ multcast_sock = socket.socket(
 multcast_sock.setsockopt(
     socket.IPPROTO_IP, socket.IP_MULTICAST_TTL, MULTICAST_TTL)
 
-
-# sock1 = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-# sock1.settimeout(0.2)
-# ttl = struct.pack('b', 1)
-# sock1.setsockopt(socket.IPPROTO_IP, socket.IP_MULTICAST_TTL, ttl)
-
-
-def wait_identifier(conn):
-    response = conn.recv(1024).decode('utf-8')
-    print(response)
-
-
 TCP_IP = 'localhost'
-TCP_PORT = Port.get_port()
-
+TCP_PORT = 3500
+TCP_PORT_CLIENT = 3501
 
 msg = {
     "ip": 'localhost',
     "port": TCP_PORT
 }
 
+def parseMessage(msgType, stringMessage):
+
+        #msgType (AC, TredMill, Lamp)
+        #stringMessage mensagem sezializada (string)
+        obj_type = objects_lookup[msgType]
+        message = obj_type()
+        message.ParseFromString(stringMessage)
+        return message
+
+def update_object(conn, index, type):
+
+    while conn is not None:
+        message = conn.recv(1024)
+        obj = parseMessage(type, message)
+        print("Valor do index: ",index)
+        intelligent_objects[type][index]["obj"] = obj
+
+def wait_identifier(conn):
+
+    response = json.loads(conn.recv(1024).decode('utf-8'))
+    value = {"conn":conn, "obj": None, }
+
+    
+    obj_list = intelligent_objects[response["type"]]
+    obj_list.append(value)
+    index = len(obj_list) - 1
+    Thread(target = update_object, args = (conn, index, response["type"])).start()
+    print(response)
 
 def send_identify_notice(sock, ip, port):
     m_g = (ip, port)
     Timer(5.0, send_identify_notice, args=(sock, ip, port)).start()
     sock.sendto(bytes(json.dumps(msg), 'utf-8'), m_g)
-    #sock.sendto(bytes(json.dumps(msg), 'utf-8'), (ip, port))
 
-# intelligent_objects = dict()
+def listen_objects(sock):
+    while True:
+        conn, addr = sock.accept()
+        tr = Thread(target=wait_identifier, args=(conn,))
+        tr.start()
 
-# intelligent_objects["Lamp"] = []
-# intelligent_objects["Treadmill"] = []
-# intelligent_objects["AC"] = []
 
+def build_response():
 
-sock_tcp = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-sock_tcp.bind((TCP_IP, TCP_PORT))
-sock_tcp.listen(1)
+    response = request_pb2.Response()
 
-# sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-# sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-# sock.bind((MCAST_GRP, MCAST_PORT))
+    for lamp in intelligent_objects["lamp"]:
+        response.lamps.append(lamp["obj"])
+
+    for treadmill in intelligent_objects["treadmill"]:
+        response.treadmills.append(treadmill["obj"])
+        
+    for ac in intelligent_objects["ac"]:
+        response.acs.append(ac["obj"])
+
+    return response.SerializeToString()
+
+def wait_command(conn):
+    while conn is not None:
+        cmd = conn.recv(1024)
+        request = request_pb2.Request()
+        request.ParseFromString(cmd)
+
+        if request.cmd == "getall":
+            conn.sendall(build_response())
+
+        #print(request)
+        #print(f"{request.cmd}, {request.id_obj}, {request.args}")
+
+tcp_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+tcp_sock.bind((TCP_IP, TCP_PORT))
+tcp_sock.listen(1)
+
+tcp_sock_client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+tcp_sock_client.bind((TCP_IP, TCP_PORT_CLIENT))
+tcp_sock_client.listen(1)
 
 send_identify_notice(multcast_sock, multicast_group[0], multicast_group[1])
-print("depois da chamda send id")
 
-while True:
-    conn, addr = sock_tcp.accept()
-    tr = Thread(target=wait_identifier, args=(conn,))
-    tr.start()
+Thread(target=listen_objects, args=(tcp_sock,)).start()
+
+conn, addr = tcp_sock_client.accept()
+tr = Thread(target=wait_command, args=(conn,))
+tr.start()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     #Thread(target=waiting_messages, args=(s, connected))
 
 # while True:
@@ -74,7 +155,7 @@ while True:
 # print(response)
 
 # sock.close()
-# sock_tcp.close()
+# tcp_sock.close()
 
 # s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 # s.bind(("localhost", 6789))
