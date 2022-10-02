@@ -33,9 +33,40 @@ message Response {
 }
 
 message Request {
-
     string cmd = 1;
     string id_obj = 2;
     repeated string args = 3; 
+    string type = 4;
+}
 
+
+
+message ResponseSingleObject {
+
+    string id_obj = 1;
+    oneof obj {
+        Lamp objL = 2;
+        Treadmill objT = 3;
+        AC objA = 4;
+    }
+        
+}
+
+message ResponseLamp {
+
+    string id_obj = 1;
+    Lamp obj = 2;
+}   
+
+
+message ResponseTreadmill {
+
+    string id_obj = 1;
+    Treadmill obj = 2;
+}
+
+message ResponseAC {
+
+    string id_obj = 1;
+    AC obj = 2;
 }

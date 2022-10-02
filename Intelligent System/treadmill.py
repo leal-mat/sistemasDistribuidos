@@ -3,14 +3,10 @@ import request_pb2
 from threading import Timer
 from intelligent_obj import IntelligentObj
 
-
+from threading import Thread
 
 MCAST_GRP = TCP_IP = 'localhost'
 MCAST_PORT = 6789
-
-
-
-
 
 
 class Treadmill(IntelligentObj):
@@ -21,6 +17,9 @@ class Treadmill(IntelligentObj):
         treadmill.vel = 0.0
         super().__init__("treadmill", treadmill)
         self.increase_dist()
+        commands_map = {"turn_on": self.turn_on,"turn_off": self.turn_off,"increase_vel": self.increase_vel,"decrease_vel": self.decrease_vel}
+        self.fill_cmd_list(commands_map.keys())
+        Thread(target=self.wait_for_command, args=(commands_map,)).start()
 
     def turn_on(self):
         self.obj.status = True

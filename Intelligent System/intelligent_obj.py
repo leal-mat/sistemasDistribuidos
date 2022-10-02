@@ -4,6 +4,7 @@ import struct
 import json
 import time
 from threading import Lock
+import request_pb2
 
 MCAST_ADDR = ('225.0.0.250', 5007)
 TCP_IP = '127.0.0.1'
@@ -16,7 +17,6 @@ MCAST_PORT = 6789
 class IntelligentObj:
 
     id_increment = 0
-
 
     def __init__(self, type, obj):
         self.type = type
@@ -65,13 +65,37 @@ class IntelligentObj:
         self.notify_presence(cmd["ip"], cmd["port"])
         #time.sleep(0.5)
         #self.send_status()
+
+    def wait_for_command(self, commands_list):
+        self.tr.join()
+        while self.tcp_sock is not None:
+            data = self.tcp_sock.recv(1024)
+            request = request_pb2.Request()
+            request.ParseFromString(data)
+
+            try:
+                handle = commands_list[request.cmd]
+                handle(*request.args)
+
+            except:
+                print("Invalid Funciton Call: ", request.cmd, "args: ", request.args)
+        #commands_list[request.cmd](request.args)
+
+
+    def fill_cmd_list(self, cmd_list):
+        for cmd in cmd_list:
+            self.obj.cmds.append(cmd)
         
     def get_id(self):
         IntelligentObj.id_increment += 1
         return str(IntelligentObj.id_increment)
+
     def send_status(self):
         #self.tr.join()
         if self.connected:
             print("sending status ", self.type)
             self.tcp_sock.sendall(self.obj.SerializeToString())
             print("Enviado ", self.type)
+
+    # def to_str(self):
+    #     pass

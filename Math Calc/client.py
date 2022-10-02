@@ -18,7 +18,8 @@ try:
         "n1": float(args_list[0]),
         "n2": float(args_list[2]),
     }
-    message_ok = True
+    if args_list[1] in ["+","-","*","/"]:
+        message_ok = True
 except:
     print("Algum argumento está invalido.")
 
@@ -37,3 +38,5 @@ if message_ok:
         s.close()
     except:
         print("Tempo excedido")
+else:
+    print("Algum argumento está invalido")
