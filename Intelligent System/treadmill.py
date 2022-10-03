@@ -27,12 +27,15 @@ class Treadmill(IntelligentObj):
 
     def turn_off(self):
         self.obj.status = False
+        self.vel = 0.0
+        self.dist = 0.0
         self.send_status()
 
     def increase_vel(self):
-        self.obj.vel += 5
-        self.obj.vel = 40.0 if self.obj.vel > 40.0 else self.obj.vel
-        self.send_status()
+        if self.obj.status == True:
+            self.obj.vel += 5
+            self.obj.vel = 40.0 if self.obj.vel > 40.0 else self.obj.vel
+            self.send_status()
 
     def increase_dist(self):
         Timer(5.0, self.increase_dist, args=()).start()
@@ -43,9 +46,10 @@ class Treadmill(IntelligentObj):
         self.send_status()
 
     def decrease_vel(self):
-        self.obj.vel -= 5
-        self.obj.vel = 0.0 if self.obj.vel < 0.0 else self.obj.vel
-        self.send_status()
+        if self.obj.status == True:
+            self.obj.vel -= 5
+            self.obj.vel = 0.0 if self.obj.vel < 0.0 else self.obj.vel
+            self.send_status()
 
     def to_str(self):
         print(self.obj.status)

@@ -69,9 +69,6 @@ def print_cmds(obj):
         for cmd in obj.cmds:
             print(f" - {cmd}")
 
-    # for cmd in obj.cmds:
-    #     print(f'   - {cmd}')
-
 
 
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -95,6 +92,8 @@ while True:
 
     print("Ex: cmd#agr1,agr2,agr3...")
     cmd_with_args = input("Escreva o comando com os argumentos \nou 0 para voltar à seleção de dispositivos: ")
+    if cmd_with_args == "0":
+        continue
 
     f_split = cmd_with_args.split("#")
     cmd = f_split[0]
@@ -108,14 +107,3 @@ while True:
         request.args.append(arg)
     
     s.sendall(request.SerializeToString())
-
-    print(cmd, args)
-
-
-
-#print(available_objects)
-# msg = input()
-# s.sendall(bytes(msg, 'utf-8'))
-# data = s.recv(1024).decode('utf-8')
-#s.close()
-#print('FROM SERVER: {s}'.format(s=repr(data)))

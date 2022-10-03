@@ -51,22 +51,3 @@ message ResponseSingleObject {
     }
         
 }
-
-message ResponseLamp {
-
-    string id_obj = 1;
-    Lamp obj = 2;
-}   
-
-
-message ResponseTreadmill {
-
-    string id_obj = 1;
-    Treadmill obj = 2;
-}
-
-message ResponseAC {
-
-    string id_obj = 1;
-    AC obj = 2;
-}

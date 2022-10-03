@@ -32,24 +32,25 @@ class IntelligentObj:
         self.tr.start()
 
     def notify_presence(self, ip, port):
-        print("entrou no notify presence - ", self.type)
         TCP_PORT = self.tcp_sock.getsockname()[1]
         id = {"type": self.type, "ip": TCP_IP, "port": TCP_PORT}
+        try:
+                
+            if not self.connected:
+                self.tcp_sock.connect((ip, port))
+                self.tcp_sock.sendall(bytes(json.dumps(id), "utf-8"))
+                self.connected = True
 
-        if not self.connected:
-            self.tcp_sock.connect((ip, port))
-            self.tcp_sock.sendall(bytes(json.dumps(id), "utf-8"))
-            self.connected = True
-
-        time.sleep(0.5)
-        self.send_status()
+            time.sleep(0.5)
+            self.send_status()
+        except:
+            print("Unable to connect")
         
 
     def wait_for_call(self):
 
         self.mcast_sock.setsockopt(
             socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-        print("--->>>PRINTANDO ADDR: ", MCAST_ADDR)
         self.mcast_sock.bind(MCAST_ADDR)
 
         mreq = struct.pack('4sl', socket.inet_aton(
@@ -95,7 +96,3 @@ class IntelligentObj:
         if self.connected:
             print("sending status ", self.type)
             self.tcp_sock.sendall(self.obj.SerializeToString())
-            print("Enviado ", self.type)
-
-    # def to_str(self):
-    #     pass
